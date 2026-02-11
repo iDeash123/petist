@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Find a Friend - Petist{% endblock %}
+
+{% block content %}
+<div class="bg-white border-b border-gray-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+        <div class="max-w-xl">
+            <h1 class="text-4xl sm:text-5xl font-bold text-gray-900 tracking-tight mb-4">
+                Find your new <br>
+                <span class="text-brand-600">best friend.</span>
+            </h1>
+            <p class="text-lg text-gray-500 leading-relaxed mb-8">
+                Every animal deserves a loving home. Browse our catalog of rescued pets waiting for a family like yours.
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12" x-data="{ showFilters: false }">
+
+    <div class="flex flex-col lg:flex-row gap-8">
+        <!-- Sidebar Filters -->
+        <aside class="lg:w-1/4">
+            <button @click="showFilters = !showFilters"
+                class="lg:hidden w-full bg-white border border-gray-200 p-4 rounded-xl flex justify-between items-center font-medium mb-4">
+                <span>Filters</span>
+                <svg class="w-5 h-5 transition-transform" :class="{'rotate-180': showFilters}" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </button>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-24"
+                :class="{'hidden': !showFilters, 'block': showFilters, 'lg:block': true}">
+                <form hx-get="{% url 'animals:animal_list' %}" hx-target="#animal-grid" hx-trigger="change delay:200ms"
+                    class="space-y-8">
+
+                    <!-- Search -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-900 mb-2">Search</label>
+                        <div class="relative">
+                            <input type="text" name="search" placeholder="Name, breed..."
+                                class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                                hx-trigger="keyup changed delay:500ms">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Species -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-900 mb-2">Species</label>
+                        <div class="space-y-2">
+                            <label class="flex items-center group cursor-pointer">
+                                <input type="radio" name="species" value="" checked
+                                    class="w-4 h-4 text-brand-600 focus:ring-brand-500 border-gray-300">
+                                <span class="ml-2 text-gray-600 group-hover:text-gray-900">All Species</span>
+                            </label>
+                            {% for spec in species_list %}
+                            <label class="flex items-center group cursor-pointer">
+                                <input type="radio" name="species" value="{{ spec.id }}"
+                                    class="w-4 h-4 text-brand-600 focus:ring-brand-500 border-gray-300">
+                                <span class="ml-2 text-gray-600 group-hover:text-gray-900">{{ spec.name }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Gender -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-900 mb-2">Gender</label>
+                        <select name="gender"
+                            class="w-full border-gray-200 rounded-lg focus:ring-brand-500 focus:border-brand-500">
+                            <option value="">Any Gender</option>
+                            {% for code, label in gender_choices %}
+                            <option value="{{ code }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                </form>
+            </div>
+        </aside>
+
+        <!-- Product Grid -->
+        <div class="lg:w-3/4">
+            <div id="animal-grid"
+                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 transition-opacity duration-200">
+                {% include 'animals/includes/animal_card_list.html' %}
+            </div>
+
+            <!-- Loading Indicator -->
+            <div class="htmx-indicator flex justify-center py-12">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

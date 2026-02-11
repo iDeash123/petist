@@ -1,6 +1,7 @@
 from django.views.generic import ListView, DetailView
 from django.db.models import Q
 from .models import Animal, Species, Breed
+from .templatetags.animal_filters import age
 
 class AnimalListView(ListView):
     model = Animal
@@ -12,7 +13,7 @@ class AnimalListView(ListView):
     def get_queryset(self):
         queryset = super().get_queryset().filter(is_available_for_adoption=True)
         
-        search_query = self.request.GET.get('search', '')
+        search_query = self.request.GET.get('q', '')
         species_id = self.request.GET.get('species')
         breed_id = self.request.GET.get('breed')
         gender = self.request.GET.get('gender')
@@ -55,7 +56,6 @@ class AnimalDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        from .templatetags.animal_filters import age
         animal = self.object
         age_str = age(animal.birth_date)
         

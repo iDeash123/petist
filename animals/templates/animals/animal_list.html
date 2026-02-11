@@ -39,10 +39,14 @@
                     <!-- Search -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-900 dark:text-gray-200 mb-2">Search</label>
-                        <div class="relative">
-                            <input type="text" name="search" placeholder="Name, breed..."
-                                class="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
-                                hx-trigger="keyup changed delay:500ms">
+                        <div class="relative" x-data="{ q: '{{ request.GET.q|default_if_none:""|escapejs }}' }">
+                            <input type="text" name="q" id="search-input" x-model="q" placeholder="Name, breed..."
+                                class="w-full pl-10 pr-12 py-2 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                                hx-get="{% url 'animals:animal_list' %}" 
+                                hx-target="#animal-grid"
+                                hx-trigger="keyup changed delay:500ms"
+                                hx-include="closest form"
+                                hx-push-url="true">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
@@ -50,6 +54,13 @@
                                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                                 </svg>
                             </div>
+                            <button type="button" @click="q = ''; $nextTick(() => { htmx.trigger('#search-input', 'change') })"
+                                x-show="q.length > 0" x-transition.opacity
+                                class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
                         </div>
                     </div>
 

@@ -53,5 +53,20 @@ class AnimalDetailView(DetailView):
     context_object_name = 'animal'
     slug_url_kwarg = 'slug'
 
-    def get_queryset(self):
-        return super().get_queryset().select_related('species', 'breed').prefetch_related('photos')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from .templatetags.animal_filters import age
+        animal = self.object
+        age_str = age(animal.birth_date)
+        
+        # Construct QR code text
+        qr_text = f"Name: {animal.name}\n"
+        qr_text += f"Species: {animal.species.name if animal.species else 'Unknown'}\n"
+        qr_text += f"Breed: {animal.breed.name if animal.breed else 'Unknown'}\n"
+        qr_text += f"Age: {age_str}\n"
+        qr_text += f"Health: {animal.health_status}\n"
+        if animal.chip_number:
+            qr_text += f"Chip: {animal.chip_number}"
+            
+        context['qr_text'] = qr_text
+        return context

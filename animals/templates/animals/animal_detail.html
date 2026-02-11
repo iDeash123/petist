@@ -1,27 +1,31 @@
 {% extends 'base.html' %}
 {% load animal_filters %}
+{% load qr_code %}
 
 {% block title %}{{ animal.name }} - Petist{% endblock %}
 
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12" x-data="{ 
     activeImage: '{{ animal.photos.first.image.url }}', 
-    showModal: false 
+    showModal: false,
+    showQRModal: false,
 }">
     <!-- Breadcrumb -->
-    <nav class="flex mb-8 text-sm font-medium text-gray-500">
-        <a href="/" class="hover:text-brand-600 transition-colors">Home</a>
+    <nav class="flex mb-8 text-sm font-medium text-gray-500 dark:text-gray-400">
+        <a href="/" class="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">Home</a>
         <span class="mx-2">/</span>
-        <a href="{% url 'animals:animal_list' %}" class="hover:text-brand-600 transition-colors">Animals</a>
+        <a href="{% url 'animals:animal_list' %}"
+            class="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">Animals</a>
         <span class="mx-2">/</span>
-        <span class="text-gray-900">{{ animal.name }}</span>
+        <span class="text-gray-900 dark:text-white">{{ animal.name }}</span>
     </nav>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
         <!-- Gallery Section -->
         <div class="space-y-4">
             <!-- Main Image -->
-            <div class="aspect-[4/3] rounded-3xl overflow-hidden bg-gray-100 shadow-lg group relative" x-data>
+            <div class="aspect-[4/3] rounded-3xl overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-lg group relative"
+                x-data>
                 {% if animal.photos.first %}
                 <img :src="activeImage" alt="{{ animal.name }}"
                     class="w-full h-full object-cover transition-opacity duration-300 cursor-zoom-in"
@@ -63,37 +67,43 @@
         <!-- Info Section -->
         <div>
             <div class="flex items-center justify-between mb-4">
-                <h1 class="text-4xl font-bold text-gray-900 font-sans">{{ animal.name }}</h1>
+                <h1 class="text-4xl font-bold text-gray-900 dark:text-white font-sans">{{ animal.name }}</h1>
                 <span
                     class="px-4 py-1.5 rounded-full text-sm font-bold tracking-wide uppercase 
-                    {% if animal.is_available_for_adoption %}bg-brand-100 text-brand-700{% else %}bg-gray-100 text-gray-600{% endif %}">
+                    {% if animal.is_available_for_adoption %}bg-brand-100 text-brand-700 dark:bg-brand-900/50 dark:text-brand-300{% else %}bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300{% endif %}">
                     {{ animal.health_status|default:"Healthy" }}
                 </span>
             </div>
 
-            <p class="text-xl text-gray-500 mb-8 font-light">
+            <p class="text-xl text-gray-500 dark:text-gray-400 mb-8 font-light">
                 {{ animal.breed.name|default:animal.species.name }} &bull; {{ animal.get_gender_display }} &bull;
                 {{ animal.birth_date|age }} old
             </p>
 
-            <div class="prose prose-lg text-gray-600 mb-10">
-                <h3 class="text-gray-900 font-semibold mb-2">About {{ animal.name }}</h3>
+            <div class="prose prose-lg text-gray-600 dark:text-gray-300 mb-10">
+                <h3 class="text-gray-900 dark:text-white font-semibold mb-2">About {{ animal.name }}</h3>
                 <p>{{ animal.description|default:"No specific behavioral notes available yet." }}</p>
 
                 {% if animal.breed.characteristics %}
-                <h4 class="text-gray-900 font-semibold mt-6 mb-2">Breed Characteristics</h4>
+                <h4 class="text-gray-900 dark:text-white font-semibold mt-6 mb-2">Breed Characteristics</h4>
                 <p>{{ animal.breed.characteristics }}</p>
                 {% endif %}
             </div>
 
             <div class="grid grid-cols-2 gap-4 mb-10">
-                <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
-                    <span class="block text-xs uppercase tracking-wider text-gray-500 mb-1">Microchip</span>
-                    <span class="font-mono text-gray-900">{{ animal.chip_number|default:"Not chipped" }}</span>
+                <div
+                    class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm transition-colors">
+                    <span
+                        class="block text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Microchip</span>
+                    <span class="font-mono text-gray-900 dark:text-white">
+                        {{ animal.chip_number|default:"Not chipped" }}
+                    </span>
                 </div>
-                <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
-                    <span class="block text-xs uppercase tracking-wider text-gray-500 mb-1">Arrival Date</span>
-                    <span class="text-gray-900">{{ animal.created_at|date:"M d, Y" }}</span>
+                <div
+                    class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm transition-colors">
+                    <span class="block text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Birth
+                        Date</span>
+                    <span class="text-gray-900 dark:text-white">{{ animal.birth_date|date:"M d, Y" }}</span>
                 </div>
             </div>
 
@@ -103,14 +113,16 @@
                     Adopt {{ animal.name }}
                 </button>
                 <button
-                    class="flex-1 bg-white hover:bg-gray-50 text-gray-900 font-bold py-4 px-8 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all">
+                    class="flex-1 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-white font-bold py-4 px-8 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all">
                     Sponsor
                 </button>
             </div>
 
             <!-- Quick Actions -->
-            <div class="mt-8 pt-8 border-t border-gray-100 flex justify-center space-x-6 text-gray-400">
-                <button class="flex items-center space-x-2 hover:text-brand-600 transition-colors">
+            <div
+                class="mt-8 pt-8 border-t border-gray-100 dark:border-gray-700 flex justify-center space-x-6 text-gray-400 dark:text-gray-500">
+                <button
+                    class="flex items-center space-x-2 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
@@ -118,15 +130,42 @@
                     </svg>
                     <span>Save to Favorites</span>
                 </button>
-                <button class="flex items-center space-x-2 hover:text-brand-600 transition-colors">
+                <button
+                    class="flex items-center space-x-2 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
+                    @click="showQRModal = true">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z">
+                            d="M12 4v1m6 11h2m-6 0h-2v4h-4v-4H8m12 4v-2c0-1-1-2-2-2h-3v-4H9v4H6c-1 0-2 1-2 2v2m16 0v2m2-2h-2m2 4h-2m-2-2h-2m-2 2h-2m6-10v-2c0-1-1-2-2-2h-3V4H9v4H6c-1 0-2 1-2 2v2">
                         </path>
                     </svg>
-                    <span>Share</span>
+                    <span>Share / QR Code</span>
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div x-show="showQRModal" style="display: none;"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90 backdrop-blur-sm transition-opacity"
+        x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
+        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+
+
+
+        <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl max-w-sm w-full mx-4 text-center relative"
+            @click.away="showQRModal = false">
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Scan for Info</h3>
+            <p class="text-gray-500 dark:text-gray-400 mb-6">Scan to save {{ animal.name }}'s details</p>
+
+            <div class="flex justify-center mb-6">
+                {% qr_from_text qr_text size="M" border=1 %}
+            </div>
+
+            <button @click="showQRModal = false"
+                class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 px-6 rounded-xl transition-colors">
+                Close
+            </button>
         </div>
     </div>
 

@@ -108,28 +108,45 @@
             </div>
 
             <div class="flex flex-col sm:flex-row gap-4">
-                <button
-                    class="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5">
-                    Adopt {{ animal.name }}
-                </button>
+                {% if user.is_authenticated %}
+                    {% include "animals/includes/adopt_button.html" with is_adopted=is_adopted animal=animal variant="primary" %}
+                {% else %}
+                    <a hx-get="{% url 'animals:start_adoption' animal.slug %}"
+                       hx-swap="none"
+                       class="cursor-pointer flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
+                        </svg>
+                        Adopt {{ animal.name }}
+                    </a>
+                {% endif %}
                 <button
                     class="flex-1 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-white font-bold py-4 px-8 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all">
                     Sponsor
                 </button>
             </div>
 
+
+
             <!-- Quick Actions -->
             <div
                 class="mt-8 pt-8 border-t border-gray-100 dark:border-gray-700 flex justify-center space-x-6 text-gray-400 dark:text-gray-500">
-                <button
-                    class="flex items-center space-x-2 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
-                        </path>
-                    </svg>
-                    <span>Save to Favorites</span>
-                </button>
+                <div id="favorite-button-container-{{ animal.id }}">
+                    {% if user.is_authenticated %}
+                        {% include "animals/includes/favorite_button.html" with is_favorited=is_favorited animal=animal variant="detail" %}
+                    {% else %}
+                        <a hx-get="{% url 'animals:start_favorite' animal.slug %}"
+                           hx-swap="none"
+                           class="cursor-pointer flex items-center space-x-2 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
+                                </path>
+                            </svg>
+                            <span>Save to Favorites</span>
+                        </a>
+                    {% endif %}
+                </div>
                 <button
                     class="flex items-center space-x-2 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
                     @click="showQRModal = true">

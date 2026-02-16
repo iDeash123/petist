@@ -44,3 +44,9 @@ def age(birth_date):
         return f"{days} day{'s' if days != 1 else ''}"
 
     return f"{hours} hour{'s' if hours != 1 else ''}"
+
+@register.filter
+def is_in_favorites(animal_id, favorites_ids):
+    if not favorites_ids:
+        return False
+    return animal_id in favorites_ids

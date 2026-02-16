@@ -2,7 +2,7 @@
 {% load animal_filters %}
 
 {% for animal in animals %}
-<div class="group bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 flex flex-col h-full transform hover:-translate-y-1"
+<div id="animal-card-{{ animal.id }}-{% if from_my_pets %}mypets{% else %}list{% endif %}" class="group bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 flex flex-col h-full transform hover:-translate-y-1"
     style="transform: translateZ(0); -webkit-mask-image: -webkit-radial-gradient(white, black); mask-image: radial-gradient(white, black);">
     <!-- Image Area -->
     <div class="relative h-64 overflow-hidden bg-gray-100">
@@ -19,7 +19,18 @@
         </div>
         {% endif %}
 
+        <!-- Favorite Button -->
+        {% if user.is_authenticated %}
+            {% include "animals/includes/favorite_button.html" with is_favorited=animal.id|is_in_favorites:favorited_animals_ids from_profile=from_profile from_my_pets=from_my_pets %}
+        {% endif %}
+
+        <!-- Adopt Button -->
+        {% if user.is_authenticated and show_adopt_button %}
+            {% include "animals/includes/adopt_button.html" with is_adopted=animal.id|is_in_favorites:adopted_animals_ids from_profile=from_profile from_my_pets=from_my_pets %}
+        {% endif %}
+
         <!-- Status Badge Removed -->
+
 
         <!-- Badges Container -->
         <div class="absolute bottom-4 left-4 right-4 flex items-center gap-2 pointer-events-none">
@@ -83,10 +94,18 @@
         </div>
 
         <!-- Action Button -->
-        <a href="{% url 'animals:animal_detail' animal.slug %}"
-            class="w-full text-center bg-gray-900 hover:bg-brand-600 text-white dark:bg-white dark:text-gray-900 dark:hover:bg-brand-600 dark:hover:text-white font-medium py-3 rounded-xl transition-all shadow-md hover:shadow-lg focus:ring-2 focus:ring-offset-2 focus:ring-brand-500">
-            Meet {{ animal.name }}
-        </a>
+        <div class="space-y-2">
+            {% if show_tame_button %}
+            <button class="w-full text-center bg-green-600 hover:bg-green-700 text-white font-medium py-3 rounded-xl transition-all shadow-md hover:shadow-lg" title="Coming Soon">
+                Tame {{ animal.name }}
+            </button>
+            {% endif %}
+            
+            <a href="{% url 'animals:animal_detail' animal.slug %}"
+                class="block w-full text-center bg-gray-900 hover:bg-brand-600 text-white dark:bg-white dark:text-gray-900 dark:hover:bg-brand-600 dark:hover:text-white font-medium py-3 rounded-xl transition-all shadow-md hover:shadow-lg focus:ring-2 focus:ring-offset-2 focus:ring-brand-500">
+                Meet {{ animal.name }}
+            </a>
+        </div>
     </div>
 </div>
 {% empty %}

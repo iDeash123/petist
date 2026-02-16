@@ -1,0 +1,10 @@
+<div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-12 text-center">
+    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 mb-4">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"></path></svg>
+    </div>
+    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">No pets yet</h3>
+    <p class="text-gray-500 dark:text-gray-400">You haven't adopted any pets yet.</p>
+    <a href="{% url 'animals:animal_list' %}" class="mt-6 inline-block px-6 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg font-medium hover:bg-brand-600 dark:hover:bg-brand-500 dark:hover:text-white transition-colors">
+        Browse Animals
+    </a>
+</div>

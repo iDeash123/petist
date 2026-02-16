@@ -3,16 +3,31 @@
 {% block title %}Find a Friend - Petist{% endblock %}
 
 {% block content %}
-<div class="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 transition-colors duration-300">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
-        <div class="max-w-xl">
-            <h1 class="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white tracking-tight mb-4">
-                Find your new <br>
-                <span class="text-brand-600 dark:text-brand-500">best friend.</span>
-            </h1>
-            <p class="text-lg text-gray-500 dark:text-gray-400 leading-relaxed mb-8">
-                Every animal deserves a loving home. Browse our catalog of rescued pets waiting for a family like yours.
-            </p>
+<div class="relative bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 transition-colors duration-300 overflow-hidden">
+    <!-- Decorative background elements -->
+    <div class="absolute inset-0 z-0 opacity-40 dark:opacity-20">
+        <div class="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-brand-50 dark:bg-brand-900/20 blur-3xl"></div>
+        <div class="absolute top-1/2 -left-24 w-64 h-64 rounded-full bg-blue-50 dark:bg-blue-900/10 blur-3xl"></div>
+    </div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div class="max-w-2xl">
+                <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight leading-tight">
+                    Find your new <span class="text-brand-600 dark:text-brand-400">best friend</span>.
+                </h1>
+                <p class="mt-2 text-base text-gray-500 dark:text-gray-400 max-w-xl">
+                    Browse our catalog of rescued pets waiting for a loving home like yours.
+                </p>
+            </div>
+            
+            <!-- Optional: Could place a small CTA or stats here if desired, keeping it clean for now -->
+             <div class="hidden md:block">
+                <div class="inline-flex items-center px-4 py-2 rounded-full bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 text-sm font-medium">
+                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>
+                    <span>{{ animals.paginator.count }} pets waiting</span>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -41,7 +56,7 @@
                         <label class="block text-sm font-semibold text-gray-900 dark:text-gray-200 mb-2">Search</label>
                         <div class="relative" x-data="{ q: '{{ request.GET.q|default_if_none:""|escapejs }}' }">
                             <input type="text" name="q" id="search-input" x-model="q" placeholder="Name, breed..."
-                                class="w-full pl-10 pr-12 py-2 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                                class="w-full !pl-10 pr-12 py-2 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
                                 hx-get="{% url 'animals:animal_list' %}" 
                                 hx-target="#animal-grid"
                                 hx-trigger="keyup changed delay:500ms"
@@ -107,7 +122,7 @@
         <div class="lg:w-3/4">
             <div id="animal-grid"
                 class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 transition-opacity duration-200">
-                {% include 'animals/includes/animal_card_list.html' %}
+                {% include 'animals/includes/animal_card_list.html' with show_adopt_button=True %}
             </div>
 
             <!-- Loading Indicator -->

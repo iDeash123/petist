@@ -1,29 +1,30 @@
-# System
+
 .DS_Store
 Thumbs.db
 ehthumbs.db
 Desktop.ini
 
-# Python
+
 __pycache__/
 *.py[cod]
 *$py.class
 
-# Virtual Environment
+
 venv/
 env/
 .env
 .venv/
 
-# Django
+
 *.log
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
 media/
+
 staticfiles/
 
-# IDE settings
+
 .vscode/
 .idea/
 *.swp
@@ -32,3 +33,8 @@ staticfiles/
 *.md
 
 technology
+
+
+**/migrations/*
+animals/migrations/*
+

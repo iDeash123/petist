@@ -35,6 +35,11 @@ staticfiles/
 technology
 
 
-**/migrations/*
-animals/migrations/*
+**/migrations/*.py
+!**/migrations/__init__.py
 
+generate_fixtures.py
+
+huge_data.json
+
+.ruff_cache

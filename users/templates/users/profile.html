@@ -58,19 +58,13 @@
                         :class="{ 'bg-brand-50 dark:bg-brand-900/10 text-brand-600 dark:text-brand-400 border-l-4 border-brand-500': activeTab === 'pets', 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-200 border-l-4 border-transparent': activeTab !== 'pets' }"
                         class="w-full text-left px-6 py-4 flex items-center transition-colors font-medium">
                         <svg class="w-5 h-5 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"></path></svg>
-                        My Pets
+                        My Animals
                     </button>
                     <button @click="activeTab = 'favorites'" 
                         :class="{ 'bg-brand-50 dark:bg-brand-900/10 text-brand-600 dark:text-brand-400 border-l-4 border-brand-500': activeTab === 'favorites', 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-200 border-l-4 border-transparent': activeTab !== 'favorites' }"
                         class="w-full text-left px-6 py-4 flex items-center transition-colors font-medium">
                         <svg class="w-5 h-5 mr-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
                         Favorites
-                    </button>
-                    <button @click="activeTab = 'applications'" 
-                        :class="{ 'bg-brand-50 dark:bg-brand-900/10 text-brand-600 dark:text-brand-400 border-l-4 border-brand-500': activeTab === 'applications', 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-200 border-l-4 border-transparent': activeTab !== 'applications' }"
-                        class="w-full text-left px-6 py-4 flex items-center transition-colors font-medium">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                        My Applications
                     </button>
                 </nav>
             </aside>
@@ -154,14 +148,22 @@
 
 
 
-                <!-- My Pets Tab (Placeholder) -->
+                <!-- My Animals Tab -->
                 <div x-show="activeTab === 'pets'" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100">
                      <div class="space-y-6">
                         <div class="flex justify-between items-center">
-                            <h3 class="text-xl font-bold text-gray-900 dark:text-white">My Pets</h3>
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white">My Animals</h3>
+                            <span id="adopted-pets-count" class="text-sm text-gray-500">{{ user_animals|length }} animals</span>
                         </div>
-                        <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-12 text-center">
-                            <p class="text-gray-500 dark:text-gray-400">This section is currently under construction.</p>
+                        
+                        <div id="adopted-pets-container">
+                        {% if user_animals %}
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {% include "animals/includes/animal_card_list.html" with animals=user_animals from_profile=True from_my_pets=True show_adopt_button=True %}
+                            </div>
+                        {% else %}
+                             {% include "users/includes/my_pets_empty.html" %}
+                        {% endif %}
                         </div>
                      </div>
                 </div>
@@ -186,34 +188,6 @@
                      </div>
                 </div>
 
-                <!-- Applications Tab (Renamed from My Pets functionality) -->
-                <div x-show="activeTab === 'applications'" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100">
-                     <div class="space-y-6">
-                        <div class="flex justify-between items-center">
-                            <h3 class="text-xl font-bold text-gray-900 dark:text-white">My Applications</h3>
-                            <span id="adopted-pets-count" class="text-sm text-gray-500">{{ user.adopted_pets.count }} animals</span>
-                        </div>
-                        
-                        <div id="adopted-pets-container">
-                        {% if user.adopted_pets.exists %}
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {% include "animals/includes/animal_card_list.html" with animals=user.adopted_pets.all from_profile=True from_my_pets=True show_adopt_button=True %}
-                            </div>
-                        {% else %}
-                            <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-12 text-center">
-                                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mb-4">
-                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                </div>
-                                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">No applications</h3>
-                                <p class="text-gray-500 dark:text-gray-400">You haven't applied for any pets yet.</p>
-                                <a href="{% url 'animals:animal_list' %}" class="mt-6 inline-block px-6 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg font-medium hover:bg-brand-600 dark:hover:bg-brand-500 dark:hover:text-white transition-colors">
-                                    Find a Friend
-                                </a>
-                            </div>
-                        {% endif %}
-                        </div>
-                     </div>
-                </div>
 
             </main>
         </div>

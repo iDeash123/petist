@@ -8,6 +8,7 @@ from .models import Animal, Species, Breed
 
 from django.template.loader import render_to_string
 from .services import generate_qr_text
+from .models import AdoptionRequest
 
 
 @login_required
@@ -133,41 +134,42 @@ def toggle_adoption(request, slug):
     animal = get_object_or_404(Animal, slug=slug)
     user = request.user
 
-    if animal in user.adopted_pets.all():
-        user.adopted_pets.remove(animal)
-        is_adopted = False
+    existing_request = AdoptionRequest.objects.filter(animal=animal, user=user).first()
+    
+    if existing_request:
+        if existing_request.status == 'pending':
+            existing_request.delete()
+            has_request = False
+            request_status = None
+        else:
+            has_request = True
+            request_status = existing_request.status
     else:
-        user.adopted_pets.add(animal)
-        is_adopted = True
+        AdoptionRequest.objects.create(animal=animal, user=user)
+        has_request = True
+        request_status = 'pending'
 
     is_from_profile = request.GET.get("from_profile") == "1"
     is_from_my_pets = request.GET.get("from_my_pets") == "1"
 
-    new_adopted_count = user.adopted_pets.count()
+    new_request_count = AdoptionRequest.objects.filter(user=user).count()
 
-    oob_sidebar_count_html = f'<span id="sidebar-pets-count" hx-swap-oob="true" class="block text-xl font-bold text-gray-900 dark:text-white">{new_adopted_count}</span>'
+    oob_sidebar_count_html = f'<span id="sidebar-pets-count" hx-swap-oob="true" class="block text-xl font-bold text-gray-900 dark:text-white">{new_request_count}</span>'
 
     extra_oob_html = ""
 
     if is_from_profile and not is_from_my_pets:
-        adopted_pets = user.adopted_pets.all()
-        if not adopted_pets.exists():
+        requests = AdoptionRequest.objects.filter(user=user).select_related('animal')
+        if not requests.exists():
             empty_html = render_to_string(
                 "users/includes/my_pets_empty.html", request=request
             )
             oob_mypets_list = f'<div id="adopted-pets-container" hx-swap-oob="true">{empty_html}</div>'
         else:
             context = {
-                "animals": adopted_pets,
-                "favorited_animals_ids": set(
-                    user.favorites.values_list("id", flat=True)
-                ),
-                "adopted_animals_ids": set(
-                    user.adopted_pets.values_list("id", flat=True)
-                ),
+                "adoption_requests": requests,
                 "from_profile": True,
                 "from_my_pets": True,
-                "show_adopt_button": True,
             }
             list_html = render_to_string(
                 "animals/includes/animal_card_list.html", context, request=request
@@ -177,22 +179,8 @@ def toggle_adoption(request, slug):
         extra_oob_html += oob_mypets_list
 
     if is_from_my_pets:
-        context = {
-            "animal": animal,
-            "is_adopted": is_adopted,
-            "from_profile": True,
-            "from_my_pets": False,
-        }
-        fav_tab_btn_html = render_to_string(
-            "animals/includes/adopt_button.html", context, request=request
-        )
-        fav_tab_btn_html = fav_tab_btn_html.replace(
-            "<button", '<button hx-swap-oob="true"', 1
-        )
-        extra_oob_html += fav_tab_btn_html
-
-        if not is_adopted:
-            if new_adopted_count == 0:
+        if not has_request: 
+             if new_request_count == 0:
                 empty_state_html = render_to_string(
                     "users/includes/my_pets_empty.html", request=request
                 )
@@ -202,15 +190,16 @@ def toggle_adoption(request, slug):
                 response["HX-Retarget"] = "#adopted-pets-container"
                 response["HX-Reswap"] = "innerHTML"
                 return response
-
-            response = HttpResponse(oob_sidebar_count_html + extra_oob_html)
-            response["HX-Retarget"] = f"#animal-card-{animal.id}-mypets"
-            response["HX-Reswap"] = "outerHTML"
-            return response
+             
+             response = HttpResponse(oob_sidebar_count_html + extra_oob_html)
+             response["HX-Retarget"] = f"#animal-card-{animal.id}-mypets"
+             response["HX-Reswap"] = "delete"
+             return response
 
     context = {
         "animal": animal,
-        "is_adopted": is_adopted,
+        "has_request": has_request,
+        "request_status": request_status,
         "from_profile": is_from_profile,
         "from_my_pets": is_from_my_pets,
     }
@@ -264,12 +253,13 @@ class AnimalListView(ListView):
             context["favorited_animals_ids"] = set(
                 self.request.user.favorites.values_list("id", flat=True)
             )
-            context["adopted_animals_ids"] = set(
-                self.request.user.adopted_pets.values_list("id", flat=True)
-            )
+            context["adoption_requests"] = {
+                req.animal_id: req.status 
+                for req in AdoptionRequest.objects.filter(user=self.request.user)
+            }
         else:
             context["favorited_animals_ids"] = set()
-            context["adopted_animals_ids"] = set()
+            context["adoption_requests"] = {}
         return context
 
     def get_template_names(self):
@@ -305,8 +295,11 @@ class AnimalDetailView(DetailView):
         context["qr_text"] = generate_qr_text(animal)
         if self.request.user.is_authenticated:
             context["is_favorited"] = animal in self.request.user.favorites.all()
-            context["is_adopted"] = animal in self.request.user.adopted_pets.all()
+            adoption_req = AdoptionRequest.objects.filter(animal=animal, user=self.request.user).first()
+            context["has_request"] = adoption_req is not None
+            context["request_status"] = adoption_req.status if adoption_req else None
         else:
             context["is_favorited"] = False
-            context["is_adopted"] = False
+            context["has_request"] = False
+            context["request_status"] = None
         return context

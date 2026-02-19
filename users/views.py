@@ -133,9 +133,13 @@ def profile_view(request):
         "favorited_animals_ids": set(
             request.user.favorites.values_list("id", flat=True)
         ),
-        "adopted_animals_ids": set(
-            request.user.adopted_pets.values_list("id", flat=True)
-        ),
+        "adoption_requests": {
+            req.animal_id: req.status
+            for req in request.user.adoption_requests.all()
+        },
+        "user_animals": [
+            req.animal for req in request.user.adoption_requests.select_related("animal").order_by("-created_at")
+        ],
     }
 
     return render(request, "users/profile.html", context)

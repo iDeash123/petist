@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 from django.utils.text import slugify
 
 
@@ -86,3 +87,39 @@ class AnimalPhoto(models.Model):
 
     def __str__(self):
         return f"Photo of {self.animal.name}"
+
+
+class AdoptionRequest(models.Model):
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("approved", "Approved"),
+        ("rejected", "Rejected"),
+    ]
+    animal = models.ForeignKey(
+        Animal, on_delete=models.CASCADE, related_name="adoption_requests"
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="adoption_requests",
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ["animal", "user"]
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.user} - {self.animal} ({self.status})"
+
+    def save(self, *args, **kwargs):
+        print(f"DEBUG: Saving AdoptionRequest {self.id} for {self.animal.name}. Status: {self.status}")
+        if self.status == "approved":
+            print(f"DEBUG: Marking {self.animal.name} as unavailable.")
+            self.animal.is_available_for_adoption = False
+            self.animal.save()
+            self.user.adopted_pets.add(self.animal)
+        
+        super().save(*args, **kwargs)

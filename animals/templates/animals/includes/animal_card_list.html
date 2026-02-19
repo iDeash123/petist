@@ -26,7 +26,7 @@
 
         <!-- Adopt Button -->
         {% if user.is_authenticated and show_adopt_button %}
-            {% include "animals/includes/adopt_button.html" with is_adopted=animal.id|is_in_favorites:adopted_animals_ids from_profile=from_profile from_my_pets=from_my_pets %}
+            {% include "animals/includes/adopt_button.html" with request_status=animal.id|get_adoption_status:adoption_requests has_request=animal.id|get_adoption_status:adoption_requests from_profile=from_profile from_my_pets=from_my_pets %}
         {% endif %}
 
         <!-- Status Badge Removed -->

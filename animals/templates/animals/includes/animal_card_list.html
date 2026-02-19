@@ -126,6 +126,7 @@
     {% if page_obj.has_previous %}
     <a hx-get="?page={{ page_obj.previous_page_number }}&search={{ request.GET.search }}&species={{ request.GET.species }}&gender={{ request.GET.gender }}"
         hx-target="#animal-grid"
+        hx-swap="innerHTML show:window:top"
         class="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-700 cursor-pointer transition-colors">
         Previous
     </a>
@@ -138,6 +139,7 @@
     {% if page_obj.has_next %}
     <a hx-get="?page={{ page_obj.next_page_number }}&search={{ request.GET.search }}&species={{ request.GET.species }}&gender={{ request.GET.gender }}"
         hx-target="#animal-grid"
+        hx-swap="innerHTML show:window:top"
         class="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-700 cursor-pointer transition-colors">
         Next
     </a>

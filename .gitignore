@@ -41,5 +41,6 @@ technology
 generate_fixtures.py
 
 huge_data.json
+fill_images.py
 
 .ruff_cache

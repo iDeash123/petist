@@ -39,9 +39,6 @@
                 class="inline-flex flex-shrink-0 items-center justify-center w-8 h-8 rounded-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm shadow-sm text-gray-700 dark:text-gray-200 pointer-events-auto"
                 title="{{ animal.get_gender_display }}">
                 {% if animal.gender == 'M' %}
-                <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
                 ♂
                 {% else %}
                 ♀
@@ -95,6 +92,14 @@
 
         <!-- Action Button -->
         <div class="space-y-2">
+            {% if from_my_pets and animal.id|get_adoption_status:adoption_requests == 'approved' %}
+            <a href="{% url 'care:animal_dashboard' animal.id %}"
+                class="block w-full text-center bg-brand-50 hover:bg-brand-100 dark:bg-brand-900/30 dark:hover:bg-brand-800/50 text-brand-700 dark:text-brand-300 font-bold py-3 rounded-xl border border-brand-200 dark:border-brand-700 shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                Animal Care
+            </a>
+            {% endif %}
+            
             {% if show_tame_button %}
             <button class="w-full text-center bg-green-600 hover:bg-green-700 text-white font-medium py-3 rounded-xl transition-all shadow-md hover:shadow-lg" title="Coming Soon">
                 Tame {{ animal.name }}

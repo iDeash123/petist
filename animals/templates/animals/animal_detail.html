@@ -120,10 +120,18 @@
                         Adopt {{ animal.name }}
                     </a>
                 {% endif %}
+                {% if has_request and request_status == 'approved' %}
+                <a href="{% url 'care:animal_dashboard' animal.id %}"
+                    class="flex-1 bg-brand-50 hover:bg-brand-100 dark:bg-brand-900/30 dark:hover:bg-brand-800/50 text-brand-700 dark:text-brand-300 font-bold py-4 px-8 rounded-xl border border-brand-200 dark:border-brand-700 shadow-sm hover:shadow-md transition-all text-center flex items-center justify-center gap-2">
+                    <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                    Animal Care
+                </a>
+                {% else %}
                 <button
                     class="flex-1 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-white font-bold py-4 px-8 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all">
                     Sponsor
                 </button>
+                {% endif %}
             </div>
 
 

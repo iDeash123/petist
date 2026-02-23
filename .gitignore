@@ -37,6 +37,7 @@ technology
 
 **/migrations/*.py
 !**/migrations/__init__.py
+care/management/**
 
 generate_fixtures.py
 

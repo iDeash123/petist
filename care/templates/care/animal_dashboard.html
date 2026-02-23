@@ -1,0 +1,321 @@
+{% extends 'base.html' %}
+{% block title %}Care Dashboard: {{ animal.name }} - Petist{% endblock %}
+
+{% block content %}
+<!-- Ambient Background Background -->
+<div class="fixed inset-0 min-h-screen bg-gray-50 dark:bg-gray-950 pointer-events-none -z-10 transition-colors duration-500">
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-brand-100/40 via-transparent to-transparent dark:from-gray-800/40 opacity-70"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-teal-50/40 via-transparent to-transparent dark:from-gray-900/40 opacity-70"></div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16">
+    <!-- Header Block (Bento Header) -->
+    <div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-white/50 dark:border-gray-700/50 mb-8 flex flex-col sm:flex-row items-center sm:items-start gap-8 relative overflow-hidden" style="animation: fadeUp 0.4s ease-out backwards;">
+        
+        <!-- Decoration -->
+        <div class="absolute -top-32 -right-32 w-96 h-96 bg-brand-400 opacity-10 dark:opacity-5 blur-3xl rounded-full pointer-events-none"></div>
+
+        {% if animal.photos.first %}
+        <div class="relative group">
+            <div class="absolute inset-0 bg-gradient-to-tr from-brand-500 to-teal-400 rounded-full blur-md opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
+            <img src="{{ animal.photos.first.image.url }}" class="relative h-32 w-32 sm:h-40 sm:w-40 rounded-full object-cover border-4 border-white dark:border-gray-800 shadow-xl z-10 transition-transform duration-500 group-hover:scale-105">
+        </div>
+        {% else %}
+        <div class="h-32 w-32 sm:h-40 sm:w-40 rounded-full bg-gradient-to-br from-brand-100 to-brand-50 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center border-4 border-white dark:border-gray-800 shadow-xl z-10">
+            <span class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-teal-500">{{ animal.name|make_list|first }}</span>
+        </div>
+        {% endif %}
+        
+        <div class="text-center sm:text-left z-10 flex-1 pt-2 sm:pt-4">
+            <div class="inline-flex items-center space-x-2 bg-brand-50 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase mb-3 border border-brand-100 dark:border-brand-800/50">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
+                <span>Care Subject</span>
+            </div>
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white tracking-tight mb-2">{{ animal.name }}</h1>
+            <p class="text-xl text-gray-500 dark:text-gray-400 font-medium">Daily dashboard for health, tasks, and observations.</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Top Row: Charts & CTA -->
+        <!-- Observation Logs (Chart) -->
+        <div class="lg:col-span-12 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-[2rem] p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-white/50 dark:border-gray-700/50 flex flex-col" style="animation: fadeUp 0.4s ease-out 0.1s backwards;">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                    <div class="p-2 bg-teal-50 dark:bg-teal-900/30 text-teal-500 rounded-xl">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
+                    </div>
+                    Observation Logs
+                </h2>
+                <span class="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-sm font-semibold rounded-lg">Weight & Activity</span>
+            </div>
+            
+            {% if observations %}
+            <div class="relative w-full h-[160px] sm:h-[180px] bg-white dark:bg-gray-900 rounded-[1.5rem] p-1 sm:p-2 border border-gray-100 dark:border-gray-800 shadow-inner mt-2">
+                <canvas id="weightChart"></canvas>
+            </div>
+            
+            <script>
+                (function() {
+                    const isDark = document.documentElement.classList.contains('dark');
+                    const ctx = document.getElementById('weightChart').getContext('2d');
+                    
+                    // Custom Gradient for Weight line
+                    let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+                    gradient.addColorStop(0, isDark ? 'rgba(20, 184, 166, 0.4)' : 'rgba(20, 184, 166, 0.2)'); // Teal
+                    gradient.addColorStop(1, 'rgba(20, 184, 166, 0)');
+                    
+                    const labels = [
+                        {% for obs in observations reversed %}
+                            "{{ obs.date|date:'M d' }}",
+                        {% endfor %}
+                    ];
+                    
+                    const weightData = [
+                        {% for obs in observations reversed %}
+                            {{ obs.weight_kg|default:0 }},
+                        {% endfor %}
+                    ];
+
+                    const activityData = [
+                        {% for obs in observations reversed %}
+                            {{ obs.activity_level }},
+                        {% endfor %}
+                    ];
+
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [
+                                {
+                                    label: 'Weight (kg)',
+                                    data: weightData,
+                                    borderColor: '#14b8a6', // teal-500
+                                    backgroundColor: gradient,
+                                    borderWidth: 3,
+                                    pointBackgroundColor: '#fff',
+                                    pointBorderColor: '#14b8a6',
+                                    pointBorderWidth: 2,
+                                    pointRadius: 4,
+                                    pointHoverRadius: 6,
+                                    fill: true,
+                                    tension: 0.4
+                                },
+                                {
+                                    label: 'Activity Level',
+                                    data: activityData,
+                                    borderColor: '#6366f1', // indigo-500
+                                    backgroundColor: 'transparent',
+                                    borderWidth: 3,
+                                    borderDash: [5, 5],
+                                    pointBackgroundColor: '#fff',
+                                    pointBorderColor: '#6366f1',
+                                    pointBorderWidth: 2,
+                                    pointRadius: 4,
+                                    pointHoverRadius: 6,
+                                    tension: 0.4,
+                                    yAxisID: 'y1',
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            interaction: {
+                                mode: 'index',
+                                intersect: false,
+                            },
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                    align: 'end',
+                                    labels: { 
+                                        color: isDark ? '#9ca3af' : '#6b7280',
+                                        usePointStyle: true,
+                                        boxWidth: 8,
+                                        font: { family: "'Outfit', sans-serif", weight: '600' }
+                                    }
+                                },
+                                tooltip: {
+                                    backgroundColor: isDark ? 'rgba(31, 41, 55, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+                                    titleColor: isDark ? '#fff' : '#111827',
+                                    bodyColor: isDark ? '#d1d5db' : '#374151',
+                                    borderColor: isDark ? '#374151' : '#e5e7eb',
+                                    borderWidth: 1,
+                                    padding: 12,
+                                    boxPadding: 4,
+                                    usePointStyle: true,
+                                    titleFont: { family: "'Outfit', sans-serif", size: 14, weight: 'bold' },
+                                    bodyFont: { family: "'Outfit', sans-serif", size: 13 }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    type: 'linear',
+                                    display: true,
+                                    position: 'left',
+                                    grid: { color: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)', drawBorder: false },
+                                    ticks: { color: isDark ? '#9ca3af' : '#6b7280', font: { family: "'Outfit', sans-serif" } },
+                                    beginAtZero: false
+                                },
+                                y1: {
+                                    type: 'linear',
+                                    display: true,
+                                    position: 'right',
+                                    grid: { drawOnChartArea: false, drawBorder: false },
+                                    ticks: { 
+                                        color: isDark ? '#9ca3af' : '#6b7280', 
+                                        font: { family: "'Outfit', sans-serif" },
+                                        stepSize: 1
+                                    },
+                                    min: 0,
+                                    max: 4
+                                },
+                                x: {
+                                    grid: { display: false, drawBorder: false },
+                                    ticks: { color: isDark ? '#9ca3af' : '#6b7280', font: { family: "'Outfit', sans-serif" } }
+                                }
+                            }
+                        }
+                    });
+                    
+                })();
+            </script>
+            {% else %}
+            <div class="flex-1 bg-white dark:bg-gray-900 rounded-2xl flex flex-col items-center justify-center text-center p-8 border border-dashed border-gray-200 dark:border-gray-700">
+                <div class="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+                    <svg class="h-8 w-8 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">No data recorded yet</h3>
+                <p class="text-gray-500 dark:text-gray-400 max-w-sm">Start logging weight and activity to see health trends for {{ animal.name }}.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Call to Action removed from here -->
+
+        <!-- Bottom Row: Tasks & Events -->
+        <!-- Daily Tasks -->
+        <div class="lg:col-span-6 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-[2rem] p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-white/50 dark:border-gray-700/50 flex flex-col" style="animation: fadeUp 0.4s ease-out 0.2s backwards;" x-data="{ showAddTaskModal: false }">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                    <div class="p-2 bg-blue-50 dark:bg-blue-900/30 text-blue-50 rounded-xl text-blue-500">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                    </div>
+                    Daily Tasks
+                </h2>
+                <button @click="showAddTaskModal = true" class="p-2 bg-gray-100 hover:bg-brand-50 text-gray-600 hover:text-brand-600 dark:bg-gray-700 dark:hover:bg-brand-900/30 dark:text-gray-300 dark:hover:text-brand-400 rounded-xl transition-colors shrink-0" title="Add Task">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                </button>
+            </div>
+            
+            <div class="space-y-4" id="task-list">
+                {% for task in tasks %}
+                    {% include "care/partials/task_item.html" %}
+                {% empty %}
+                    <div id="empty-tasks" class="text-center py-8">
+                        <div class="w-16 h-16 bg-gray-50 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-gray-300 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 font-medium">All caught up! No tasks assigned.</p>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Add Task Modal -->
+            <div x-show="showAddTaskModal" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
+                <div x-show="showAddTaskModal" x-transition.opacity class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm" @click="showAddTaskModal = false"></div>
+                
+                <div x-show="showAddTaskModal" 
+                     x-transition:enter="transition ease-out duration-300 transform"
+                     x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                     x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                     x-transition:leave="transition ease-in duration-200 transform"
+                     x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                     class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md p-6 overflow-hidden">
+                     
+                     <div class="flex justify-between items-center mb-5">
+                         <h3 class="text-xl font-bold text-gray-900 dark:text-white">Add New Task</h3>
+                         <button @click="showAddTaskModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                         </button>
+                     </div>
+                     
+                     <form hx-post="{% url 'care:add_task' animal.id %}" hx-target="#task-list" hx-swap="beforeend" @htmx:after-request="showAddTaskModal = false; $refs.taskForm.reset(); document.getElementById('empty-tasks')?.remove()" x-ref="taskForm">
+                         {% csrf_token %}
+                         <div class="space-y-4">
+                             <div>
+                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Task Title</label>
+                                 <input type="text" name="title" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:ring-brand-500 focus:border-brand-500 px-4 py-3 shadow-sm" placeholder="e.g. Give medication">
+                             </div>
+                             <div>
+                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Due Date (Optional)</label>
+                                 <input type="date" name="due_date" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:ring-brand-500 focus:border-brand-500 px-4 py-3 shadow-sm [color-scheme:light] dark:[color-scheme:dark]">
+                             </div>
+                         </div>
+                         <div class="mt-6">
+                             <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 px-4 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                 Save Task
+                             </button>
+                         </div>
+                     </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Events -->
+        <div class="lg:col-span-6 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-[2rem] p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-white/50 dark:border-gray-700/50 relative overflow-hidden flex flex-col" style="animation: fadeUp 0.4s ease-out 0.25s backwards;">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-orange-100 dark:bg-orange-900/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+            
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3 relative z-10">
+                <div class="p-2 bg-orange-50 dark:bg-orange-900/30 text-orange-500 rounded-xl">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                </div>
+                Upcoming Events
+            </h2>
+            <div class="space-y-4 relative z-10">
+                {% for event in events %}
+                <div class="group flex items-center space-x-4 p-4 rounded-2xl bg-white dark:bg-gray-900 shadow-sm border border-gray-100 dark:border-gray-700 hover:border-brand-300 dark:hover:border-brand-700 transition-colors">
+                    <div class="flex-shrink-0 bg-gray-50 dark:bg-gray-800 p-3 rounded-xl text-center min-w-[3.5rem] group-hover:bg-brand-50 dark:group-hover:bg-brand-900/30 transition-colors">
+                        <span class="block text-xs font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider mb-1">{{ event.date|date:"M" }}</span>
+                        <span class="block text-xl font-black text-gray-900 dark:text-white leading-none">{{ event.date|date:"d" }}</span>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-gray-900 dark:text-white text-lg">{{ event.title }}</h4>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ event.get_event_type_display }}</p>
+                    </div>
+                </div>
+                {% empty %}
+                    <div class="text-center py-6">
+                        <p class="text-gray-500 dark:text-gray-400 font-medium">No upcoming events scheduled.</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Call to Action Banner -->
+        <div class="lg:col-span-12 relative overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 rounded-[2rem] p-8 sm:p-10 shadow-xl group flex flex-col sm:flex-row items-center justify-between gap-8 mt-4" style="animation: fadeUp 0.4s ease-out 0.3s backwards;">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-brand-500 opacity-20 rounded-full blur-3xl -mr-32 -mt-32 transition-transform duration-700 group-hover:scale-125"></div>
+            <div class="absolute bottom-0 left-0 w-96 h-96 bg-teal-500 opacity-10 rounded-full blur-3xl -ml-32 -mb-32 transition-transform duration-700 group-hover:scale-125"></div>
+            
+            <div class="relative z-10 text-center sm:text-left max-w-2xl">
+                <h3 class="text-2xl sm:text-3xl font-extrabold text-white mb-3 tracking-tight">Notice anything unusual?</h3>
+                <p class="text-gray-400 text-lg">Log observations regularly to spot health trends early.</p>
+            </div>
+            
+            <div class="relative z-10 flex-shrink-0 w-full sm:w-auto">
+                <button class="w-full sm:w-auto bg-white hover:bg-brand-50 text-gray-900 font-extrabold py-4 px-8 rounded-2xl shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:shadow-[0_0_30px_rgba(34,197,94,0.5)] transform hover:-translate-y-1 transition-all duration-300">
+                    Add Observation
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,24 @@
+<div class="flex items-center space-x-3 p-3 rounded-xl border {% if task.is_completed %}border-brand-200 bg-brand-50 dark:border-brand-900/50 dark:bg-brand-900/20{% else %}border-gray-100 bg-gray-50 dark:border-gray-700 dark:bg-gray-700/50{% endif %} transition-colors group relative">
+    <input type="checkbox" 
+           id="task-{{ task.id }}"
+           hx-post="{% url 'care:toggle_task' task.id %}" 
+           hx-swap="outerHTML" 
+           hx-target="closest div"
+           {% if task.is_completed %}checked{% endif %}
+           class="w-5 h-5 text-brand-600 rounded border-gray-300 focus:ring-brand-500 transition-colors cursor-pointer shrink-0">
+    <label for="task-{{ task.id }}" class="flex-1 font-medium {% if task.is_completed %}text-brand-700 dark:text-brand-300 line-through opacity-70{% else %}text-gray-900 dark:text-gray-100{% endif %} cursor-pointer pr-2">
+        {{ task.title }}
+    </label>
+    {% if task.due_date %}
+    <span class="text-xs text-gray-400 font-bold uppercase tracking-wider pr-8">{{ task.due_date|date:"M d" }}</span>
+    {% endif %}
+    
+    <button type="button" 
+            hx-post="{% url 'care:delete_task' task.id %}" 
+            hx-target="closest div" 
+            hx-swap="outerHTML"
+            class="absolute right-3 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg opacity-0 group-hover:opacity-100 transition-all focus:outline-none focus:opacity-100"
+            title="Delete Task">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+    </button>
+</div>

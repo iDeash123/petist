@@ -1,4 +1,5 @@
 from django.views.generic import ListView, DetailView
+from django.core.cache import cache
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -9,6 +10,12 @@ from .models import Animal, Species, Breed
 from django.template.loader import render_to_string
 from .services import generate_qr_text
 from .models import AdoptionRequest
+
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.shortcuts import render
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 
 @login_required
@@ -69,9 +76,10 @@ def toggle_favorite(request, slug):
                 "favorited_animals_ids": set(
                     user.favorites.values_list("id", flat=True)
                 ),
-                "adopted_animals_ids": set(
-                    user.adopted_pets.values_list("id", flat=True)
-                ),
+                "adoption_requests": {
+                    req.animal_id: req.status
+                    for req in AdoptionRequest.objects.filter(user=user)
+                },
                 "from_profile": True,
                 "show_adopt_button": True,
             }
@@ -92,9 +100,10 @@ def toggle_favorite(request, slug):
                     "favorited_animals_ids": set(
                         user.favorites.values_list("id", flat=True)
                     ),
-                    "adopted_animals_ids": set(
-                        user.adopted_pets.values_list("id", flat=True)
-                    ),
+                    "adoption_requests": {
+                        req.animal_id: req.status
+                        for req in AdoptionRequest.objects.filter(user=user)
+                    },
                     "from_profile": True,
                     "show_adopt_button": True,
                 }
@@ -167,9 +176,16 @@ def toggle_adoption(request, slug):
             oob_mypets_list = f'<div id="adopted-pets-container" hx-swap-oob="true">{empty_html}</div>'
         else:
             context = {
-                "adoption_requests": requests,
+                "animals": [req.animal for req in requests],
+                "favorited_animals_ids": set(
+                    user.favorites.values_list("id", flat=True)
+                ),
+                "adoption_requests": {
+                    req.animal_id: req.status for req in requests
+                },
                 "from_profile": True,
                 "from_my_pets": True,
+                "show_adopt_button": True,
             }
             list_html = render_to_string(
                 "animals/includes/animal_card_list.html", context, request=request
@@ -246,8 +262,19 @@ class AnimalListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["species_list"] = Species.objects.all()
-        context["breeds_list"] = Breed.objects.all()
+        
+        species_list = cache.get("species_list")
+        if species_list is None:
+            species_list = list(Species.objects.all())
+            cache.set("species_list", species_list, 60 * 60 * 24)
+        context["species_list"] = species_list
+
+        breeds_list = cache.get("breeds_list")
+        if breeds_list is None:
+            breeds_list = list(Breed.objects.all())
+            cache.set("breeds_list", breeds_list, 60 * 60 * 24)
+        context["breeds_list"] = breeds_list
+
         context["gender_choices"] = Animal.GENDER_CHOICES
         if self.request.user.is_authenticated:
             context["favorited_animals_ids"] = set(
@@ -303,3 +330,64 @@ class AnimalDetailView(DetailView):
             context["has_request"] = False
             context["request_status"] = None
         return context
+
+
+class ManagerAdoptionRequestListView(UserPassesTestMixin, ListView):
+    model = AdoptionRequest
+    template_name = "animals/manager/request_list.html"
+    context_object_name = "requests"
+    paginate_by = 20
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+    def get_queryset(self):
+        return super().get_queryset().select_related("user", "animal").order_by("-created_at")
+
+
+@staff_member_required
+@require_POST
+def manager_update_request_status(request, pk):
+    adoption_request = get_object_or_404(AdoptionRequest, pk=pk)
+    new_status = request.POST.get("status")
+
+    if new_status in dict(AdoptionRequest.STATUS_CHOICES):
+        adoption_request.status = new_status
+        adoption_request.save()
+
+        channel_layer = get_channel_layer()
+        
+
+        context = {
+            "animal": adoption_request.animal,
+            "has_request": True,
+            "request_status": adoption_request.status,
+            "from_profile": False,
+            "from_my_pets": False,
+        }
+        
+
+        context["variant"] = "list"
+        html_list = render_to_string("animals/includes/adopt_button.html", context, request=request)
+        
+        context["variant"] = "detail"
+        html_detail = render_to_string("animals/includes/adopt_button.html", context, request=request)
+        
+        context["variant"] = "primary"
+        html_primary = render_to_string("animals/includes/adopt_button.html", context, request=request)
+
+
+        group_name = f"user_requests_{adoption_request.user.id}"
+        async_to_sync(channel_layer.group_send)(
+            group_name,
+            {
+                "type": "adoption_status_update",
+                "html": html_list + html_detail + html_primary,
+            }
+        )
+
+    return render(
+        request,
+        "animals/manager/includes/request_row.html",
+        {"req": adoption_request},
+    )

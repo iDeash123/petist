@@ -1,0 +1,71 @@
+<tr id="request-row-{{ req.id }}" class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+        {{ req.created_at|date:"M d, Y H:i" }}
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap">
+        <a href="{% url 'animals:animal_detail' req.animal.slug %}" class="flex items-center group">
+            {% if req.animal.photos.first %}
+                <img src="{{ req.animal.photos.first.image.url }}" alt="{{ req.animal.name }}" class="h-10 w-10 rounded-full object-cover border-2 border-transparent group-hover:border-brand-500 transition-colors">
+            {% else %}
+                <div class="h-10 w-10 rounded-full bg-brand-100 flex items-center justify-center text-brand-600">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                </div>
+            {% endif %}
+            <div class="ml-3">
+                <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">{{ req.animal.name }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ req.animal.species.name|default:"Unknown" }}</p>
+            </div>
+        </a>
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap">
+        <div class="flex items-center">
+            {% if req.user.profile.avatar %}
+                <img src="{{ req.user.profile.avatar.url }}" alt="{{ req.user.username }}" class="h-8 w-8 rounded-full object-cover">
+            {% else %}
+                <div class="h-8 w-8 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 text-xs font-bold">
+                    {{ req.user.username|make_list|first|upper }}
+                </div>
+            {% endif %}
+            <div class="ml-3">
+                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ req.user.username }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ req.user.email }}</p>
+            </div>
+        </div>
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap">
+        {% if req.status == 'approved' %}
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                Approved
+            </span>
+        {% elif req.status == 'rejected' %}
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                Rejected
+            </span>
+        {% else %}
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
+                Pending
+            </span>
+        {% endif %}
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+        <form hx-post="{% url 'animals:manager_request_status_update' req.id %}"
+              hx-target="#request-row-{{ req.id }}" 
+              hx-swap="outerHTML"
+              class="flex items-center space-x-2">
+            {% csrf_token %}
+            <div class="relative">
+                <select name="status" class="block w-full pl-3 pr-8 py-2 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-brand-500 focus:border-brand-500 sm:text-sm rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white appearance-none">
+                    <option value="pending" {% if req.status == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="approved" {% if req.status == 'approved' %}selected{% endif %}>Approve</option>
+                    <option value="rejected" {% if req.status == 'rejected' %}selected{% endif %}>Reject</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500 dark:text-gray-400">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+            </div>
+            <button type="submit" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-colors">
+                Save
+            </button>
+        </form>
+    </td>
+</tr>

@@ -21,7 +21,6 @@ def age(birth_date):
     if delta.total_seconds() < 0:
         return "Not born yet"
 
-    # Calculate components
     hours = int(delta.total_seconds() // 3600)
     days = delta.days
     years = days // 365

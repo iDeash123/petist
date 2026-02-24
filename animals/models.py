@@ -3,6 +3,11 @@ from django.conf import settings
 from django.utils.text import slugify
 
 
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+from django.core.cache import cache
+
+
 class Species(models.Model):
     name = models.CharField(max_length=50, unique=True)
     description = models.TextField(blank=True)
@@ -122,4 +127,18 @@ class AdoptionRequest(models.Model):
             self.animal.save()
             self.user.adopted_pets.add(self.animal)
         
+        
         super().save(*args, **kwargs)
+
+
+@receiver([post_save, post_delete], sender=Species)
+def clear_species_cache(sender, instance, **kwargs):
+    cache.delete("species_list")
+
+@receiver([post_save, post_delete], sender=Breed)
+def clear_breed_cache(sender, instance, **kwargs):
+    cache.delete("breeds_list")
+
+@receiver([post_save, post_delete], sender=Animal)
+def clear_animal_cache(sender, instance, **kwargs):
+    cache.clear()

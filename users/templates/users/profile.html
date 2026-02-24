@@ -89,10 +89,8 @@
                                     <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Avatar</label>
                                     <div class="flex items-center space-x-6">
                                         <div class="shrink-0">
-                                            <template x-if="previewUrl">
-                                                <img :src="previewUrl" class="h-20 w-20 object-cover rounded-full ring-2 ring-gray-100 dark:ring-gray-700">
-                                            </template>
-                                            <template x-if="!previewUrl">
+                                            <img x-show="previewUrl" x-cloak :src="previewUrl" class="h-20 w-20 object-cover rounded-full ring-2 ring-gray-100 dark:ring-gray-700">
+                                            <div x-show="!previewUrl">
                                                 {% if user.profile.avatar %}
                                                     <img src="{{ user.profile.avatar.url }}" class="h-20 w-20 object-cover rounded-full ring-2 ring-gray-100 dark:ring-gray-700">
                                                 {% else %}
@@ -100,7 +98,7 @@
                                                         <svg class="h-10 w-10" fill="currentColor" viewBox="0 0 24 24"><path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                                                     </div>
                                                 {% endif %}
-                                            </template>
+                                            </div>
                                         </div>
                                         <div>
                                             <button type="button" @click="$refs.fileInput.click()" class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm">

@@ -4,6 +4,7 @@ from django.views.decorators.http import require_POST
 from django.http import HttpResponse
 from animals.models import Animal
 from .models import Task
+from .forms import EventForm, ObservationLogForm
 
 @login_required
 def dashboard(request):
@@ -28,6 +29,8 @@ def animal_care_dashboard(request, animal_id):
         'tasks': tasks,
         'events': events,
         'observations': observations,
+        'event_form': EventForm(),
+        'observation_form': ObservationLogForm(),
     }
     return render(request, 'care/animal_dashboard.html', context)
 
@@ -73,3 +76,35 @@ def delete_task(request, task_id):
         
     task.delete()
     return HttpResponse('')
+
+@login_required
+@require_POST
+def add_event(request, animal_id):
+    animal = get_object_or_404(Animal, id=animal_id)
+    if animal not in request.user.adopted_pets.all() and not request.user.is_superuser:
+        return redirect('home')
+        
+    form = EventForm(request.POST)
+    if form.is_valid():
+        event = form.save(commit=False)
+        event.animal = animal
+        event.save()
+        return redirect('care:animal_dashboard', animal_id=animal.id)
+        
+    return redirect('care:animal_dashboard', animal_id=animal.id)
+
+@login_required
+@require_POST
+def add_observation(request, animal_id):
+    animal = get_object_or_404(Animal, id=animal_id)
+    if animal not in request.user.adopted_pets.all() and not request.user.is_superuser:
+        return redirect('home')
+        
+    form = ObservationLogForm(request.POST)
+    if form.is_valid():
+        obs = form.save(commit=False)
+        obs.animal = animal
+        obs.save()
+        return redirect('care:animal_dashboard', animal_id=animal.id)
+        
+    return redirect('care:animal_dashboard', animal_id=animal.id)

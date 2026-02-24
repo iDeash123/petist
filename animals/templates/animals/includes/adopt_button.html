@@ -1,6 +1,7 @@
 {% with button_variant=variant|default:"list" %}
 {% if button_variant == 'primary' %}
 <button
+    id="adopt-btn-{{ animal.id }}-primary"
     class="flex-1 {% if has_request and request_status == 'pending' %}bg-yellow-500 hover:bg-yellow-600{% elif has_request and request_status == 'approved' %}bg-green-600 cursor-default{% elif has_request and request_status == 'rejected' %}bg-red-500 cursor-default{% else %}bg-green-600 hover:bg-green-700{% endif %} text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
     {% if not has_request or request_status == 'pending' %}
     hx-post="{% url 'animals:toggle_adoption' animal.slug %}" 
@@ -37,6 +38,7 @@
 
 {% elif button_variant == 'detail' %}
 <button
+    id="adopt-btn-{{ animal.id }}-detail"
     class="flex items-center space-x-2 {% if has_request and request_status == 'pending' %}text-yellow-600 hover:text-yellow-700{% elif has_request and request_status == 'approved' %}text-green-600 cursor-default{% elif has_request and request_status == 'rejected' %}text-red-600 cursor-default{% else %}hover:text-brand-600 dark:hover:text-brand-400{% endif %} transition-colors"
     {% if not has_request or request_status == 'pending' %}
     hx-post="{% url 'animals:toggle_adoption' animal.slug %}" 

@@ -13,6 +13,7 @@
 
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10/dist/ext/ws.js"></script>
 
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -43,6 +44,50 @@
         }
     }"
     x-init="$watch('darkMode', val => val ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark'))">
+
+    {% if user.is_authenticated %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            var socket_url = protocol + '//' + window.location.host + '/ws/adoption-requests/';
+            var socket = new WebSocket(socket_url);
+            
+            socket.onmessage = function(e) {
+                var data = JSON.parse(e.data);
+                if (data.html) {
+                    // Create a temporary div to parse the incoming HTML
+                    var temp = document.createElement('div');
+                    temp.innerHTML = data.html;
+                    
+                    // We can use HTMX's internal method to process OOB swaps from a string.
+                    // This is much safer than manually replacing DOM strings.
+                    htmx.process(temp);
+                    
+                    // But actually, for OOB swaps to work from Javascript, we just let HTMX parse it
+                    // The easiest trick is:
+                    var fakeServerResponse = data.html;
+                    var swapInfo = htmx.ajax('GET', 'javascript:void(0)', {
+                        handler: function(elt, info) {
+                            // HTMX will handle OOB elements automatically if we mock a response!
+                        }
+                    });
+                    
+                    // Actually, there's a simpler way without hacking HTMX:
+                    // Since the items have IDs, we just manually replace them:
+                    var elementsToReplace = temp.querySelectorAll('[id]');
+                    elementsToReplace.forEach(function(newEl) {
+                        var oldEl = document.getElementById(newEl.id);
+                        if (oldEl) {
+                            oldEl.outerHTML = newEl.outerHTML;
+                            // Re-process HTMX on the new element
+                            htmx.process(document.getElementById(newEl.id));
+                        }
+                    });
+                }
+            };
+        });
+    </script>
+    {% endif %}
 
     <!-- Navigation -->
     <nav
@@ -109,7 +154,11 @@
                                  x-transition:leave="transition ease-in duration-75"
                                  x-transition:leave-start="transform opacity-100 scale-100"
                                  x-transition:leave-end="transform opacity-0 scale-95"
-                                 class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-50">
+                                 class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-50">
+                                {% if user.is_staff %}
+                                    <a href="{% url 'animals:manager_requests' %}" class="block px-4 py-2 text-sm font-semibold text-brand-600 dark:text-brand-400 hover:bg-gray-100 dark:hover:bg-gray-700">Manager Dashboard</a>
+                                    <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
+                                {% endif %}
                                 <a href="{% url 'users:profile' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Your Profile</a>
                                 <a href="{% url 'users:logout' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Sign out</a>
                             </div>

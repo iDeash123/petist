@@ -9,4 +9,6 @@ urlpatterns = [
     path('animal/<int:animal_id>/task/add/', views.add_task, name='add_task'),
     path('task/<int:task_id>/toggle/', views.toggle_task, name='toggle_task'),
     path('task/<int:task_id>/delete/', views.delete_task, name='delete_task'),
+    path('animal/<int:animal_id>/event/add/', views.add_event, name='add_event'),
+    path('animal/<int:animal_id>/observation/add/', views.add_observation, name='add_observation'),
 ]

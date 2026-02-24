@@ -14,8 +14,8 @@ from .models import AdoptionRequest
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import render
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
+# from channels.layers import get_channel_layer
+# from asgiref.sync import async_to_sync
 
 
 @login_required
@@ -355,36 +355,36 @@ def manager_update_request_status(request, pk):
         adoption_request.status = new_status
         adoption_request.save()
 
-        channel_layer = get_channel_layer()
-        
+        # channel_layer = get_channel_layer()
+        # 
 
-        context = {
-            "animal": adoption_request.animal,
-            "has_request": True,
-            "request_status": adoption_request.status,
-            "from_profile": False,
-            "from_my_pets": False,
-        }
-        
+        # context = {
+        #     "animal": adoption_request.animal,
+        #     "has_request": True,
+        #     "request_status": adoption_request.status,
+        #     "from_profile": False,
+        #     "from_my_pets": False,
+        # }
+        # 
 
-        context["variant"] = "list"
-        html_list = render_to_string("animals/includes/adopt_button.html", context, request=request)
-        
-        context["variant"] = "detail"
-        html_detail = render_to_string("animals/includes/adopt_button.html", context, request=request)
-        
-        context["variant"] = "primary"
-        html_primary = render_to_string("animals/includes/adopt_button.html", context, request=request)
+        # context["variant"] = "list"
+        # html_list = render_to_string("animals/includes/adopt_button.html", context, request=request)
+        # 
+        # context["variant"] = "detail"
+        # html_detail = render_to_string("animals/includes/adopt_button.html", context, request=request)
+        # 
+        # context["variant"] = "primary"
+        # html_primary = render_to_string("animals/includes/adopt_button.html", context, request=request)
 
 
-        group_name = f"user_requests_{adoption_request.user.id}"
-        async_to_sync(channel_layer.group_send)(
-            group_name,
-            {
-                "type": "adoption_status_update",
-                "html": html_list + html_detail + html_primary,
-            }
-        )
+        # group_name = f"user_requests_{adoption_request.user.id}"
+        # async_to_sync(channel_layer.group_send)(
+        #     group_name,
+        #     {
+        #         "type": "adoption_status_update",
+        #         "html": html_list + html_detail + html_primary,
+        #     }
+        # )
 
     return render(
         request,

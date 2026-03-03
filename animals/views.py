@@ -287,6 +287,8 @@ class AnimalListView(ListView):
         else:
             context["favorited_animals_ids"] = set()
             context["adoption_requests"] = {}
+
+        context["show_adopt_button"] = True
         return context
 
     def get_template_names(self):

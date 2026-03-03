@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import HttpResponse
-from .models import Animal, Species, Breed
+from .models import Animal, Species, Breed, AnimalPhoto
 
 from django.template.loader import render_to_string
 from .services import generate_qr_text
@@ -357,39 +357,49 @@ def manager_update_request_status(request, pk):
         adoption_request.status = new_status
         adoption_request.save()
 
-        # channel_layer = get_channel_layer()
-        # 
-
-        # context = {
-        #     "animal": adoption_request.animal,
-        #     "has_request": True,
-        #     "request_status": adoption_request.status,
-        #     "from_profile": False,
-        #     "from_my_pets": False,
-        # }
-        # 
-
-        # context["variant"] = "list"
-        # html_list = render_to_string("animals/includes/adopt_button.html", context, request=request)
-        # 
-        # context["variant"] = "detail"
-        # html_detail = render_to_string("animals/includes/adopt_button.html", context, request=request)
-        # 
-        # context["variant"] = "primary"
-        # html_primary = render_to_string("animals/includes/adopt_button.html", context, request=request)
-
-
-        # group_name = f"user_requests_{adoption_request.user.id}"
-        # async_to_sync(channel_layer.group_send)(
-        #     group_name,
-        #     {
-        #         "type": "adoption_status_update",
-        #         "html": html_list + html_detail + html_primary,
-        #     }
-        # )
-
     return render(
         request,
         "animals/manager/includes/request_row.html",
         {"req": adoption_request},
     )
+
+
+@staff_member_required
+def animal_create(request):
+    from .forms import AnimalForm
+
+    if request.method == "POST":
+        form = AnimalForm(request.POST, request.FILES)
+        if form.is_valid():
+            animal = form.save()
+            photo_file = form.cleaned_data.get("photo")
+            if photo_file:
+                AnimalPhoto.objects.create(animal=animal, image=photo_file, is_main=True)
+
+            animal = Animal.objects.select_related("species", "breed").prefetch_related("photos").get(pk=animal.pk)
+
+            context = {
+                "animals": [animal],
+                "favorited_animals_ids": set(),
+                "adoption_requests": {},
+                "show_adopt_button": True,
+            }
+            card_html = render_to_string(
+                "animals/includes/animal_card_list.html", context, request=request
+            )
+            oob_html = f'<div id="animal-grid" hx-swap-oob="afterbegin">{card_html}</div>'
+            success_html = '<div class="text-center py-4"><p class="text-green-600 dark:text-green-400 font-semibold text-lg">Animal added successfully!</p></div>'
+            response = HttpResponse(success_html + oob_html)
+            response["HX-Trigger"] = "animalCreated"
+            return response
+        else:
+            return render(request, "animals/includes/animal_form.html", {"form": form})
+
+    form = AnimalForm()
+    return render(request, "animals/includes/animal_form.html", {"form": form})
+
+
+def load_breeds(request):
+    species_id = request.GET.get("species")
+    breeds = Breed.objects.filter(species_id=species_id) if species_id else Breed.objects.none()
+    return render(request, "animals/includes/breed_options.html", {"breeds": breeds})

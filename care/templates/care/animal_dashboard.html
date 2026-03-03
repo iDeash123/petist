@@ -191,7 +191,11 @@
                     </svg>
                 </div>
                 <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">No data recorded yet</h3>
-                <p class="text-gray-500 dark:text-gray-400 max-w-sm">Start logging weight and activity to see health trends for {{ animal.name }}.</p>
+                <p class="text-gray-500 dark:text-gray-400 max-w-sm mb-4">Start logging weight and activity to see health trends for {{ animal.name }}.</p>
+                <button @click="$dispatch('open-add-observation')" class="inline-flex items-center px-4 py-2 bg-teal-50 hover:bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:hover:bg-teal-900/50 dark:text-teal-400 font-bold rounded-xl transition-colors">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Add First Observation
+                </button>
             </div>
             {% endif %}
         </div>
@@ -221,52 +225,57 @@
                         <div class="w-16 h-16 bg-gray-50 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
                             <svg class="w-8 h-8 text-gray-300 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                         </div>
-                        <p class="text-gray-500 dark:text-gray-400 font-medium">All caught up! No tasks assigned.</p>
+                        <p class="text-gray-500 dark:text-gray-400 font-medium mb-4">All caught up! No tasks assigned.</p>
+                        <button @click="showAddTaskModal = true" class="inline-flex items-center px-4 py-2 bg-brand-50 hover:bg-brand-100 text-brand-600 dark:bg-brand-900/30 dark:hover:bg-brand-900/50 dark:text-brand-400 font-bold rounded-xl transition-colors">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            Add New Task
+                        </button>
                     </div>
                 {% endfor %}
             </div>
 
             <!-- Add Task Modal -->
-            <div x-show="showAddTaskModal" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
-                <div x-show="showAddTaskModal" x-transition.opacity class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm" @click="showAddTaskModal = false"></div>
-                
-                <div x-show="showAddTaskModal" 
-                     x-transition:enter="transition ease-out duration-300 transform"
-                     x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                     x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                     x-transition:leave="transition ease-in duration-200 transform"
-                     x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                     class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md p-6 overflow-hidden">
-                     
-                     <div class="flex justify-between items-center mb-5">
-                         <h3 class="text-xl font-bold text-gray-900 dark:text-white">Add New Task</h3>
-                         <button @click="showAddTaskModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
-                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                         </button>
-                     </div>
-                     
-                     <form hx-post="{% url 'care:add_task' animal.id %}" hx-target="#task-list" hx-swap="beforeend" @htmx:after-request="showAddTaskModal = false; $refs.taskForm.reset(); document.getElementById('empty-tasks')?.remove()" x-ref="taskForm">
-                         {% csrf_token %}
-                         <div class="space-y-4">
-                             <div>
-                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Task Title</label>
-                                 <input type="text" name="title" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:ring-brand-500 focus:border-brand-500 px-4 py-3 shadow-sm" placeholder="e.g. Give medication">
-                             </div>
-                             <div>
-                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Due Date (Optional)</label>
-                                 <input type="date" name="due_date" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:ring-brand-500 focus:border-brand-500 px-4 py-3 shadow-sm [color-scheme:light] dark:[color-scheme:dark]">
-                             </div>
-                         </div>
-                         <div class="mt-6">
-                             <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 px-4 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
-                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                 Save Task
-                             </button>
-                         </div>
-                     </form>
+            <template x-teleport="body">
+                <div x-show="showAddTaskModal" class="fixed inset-0 z-[100] flex items-center justify-center sm:p-4" x-cloak>
+                    <div x-show="showAddTaskModal" x-transition.opacity class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm" @click="showAddTaskModal = false"></div>
+                    <div x-show="showAddTaskModal"
+                         x-transition:enter="transition ease-out duration-300 transform"
+                         x-transition:enter-start="opacity-0 translate-y-full sm:translate-y-4 sm:scale-95"
+                         x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                         x-transition:leave="transition ease-in duration-200 transform"
+                         x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                         x-transition:leave-end="opacity-0 translate-y-full sm:translate-y-4 sm:scale-95"
+                         class="relative bg-white dark:bg-gray-800 sm:rounded-2xl shadow-2xl w-full h-full sm:h-auto sm:max-h-[90vh] max-w-lg flex flex-col overflow-hidden text-left" @click.stop>
+                        <div class="flex-shrink-0 flex justify-between items-center p-6 border-b border-gray-100 dark:border-gray-700">
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white">Add New Task</h3>
+                            <button @click="showAddTaskModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+                        <div class="flex-1 overflow-y-auto p-6 custom-scrollbar">
+                            <form hx-post="{% url 'care:add_task' animal.id %}" hx-target="#task-list" hx-swap="beforeend" @htmx:after-request="showAddTaskModal = false; $refs.taskForm.reset(); document.getElementById('empty-tasks')?.remove()" x-ref="taskForm">
+                                {% csrf_token %}
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Task Title</label>
+                                        <input type="text" name="title" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:ring-brand-500 focus:border-brand-500 px-4 py-3 shadow-sm" placeholder="e.g. Give medication">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Due Date (Optional)</label>
+                                        <input type="date" name="due_date" class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:ring-brand-500 focus:border-brand-500 px-4 py-3 shadow-sm [color-scheme:light] dark:[color-scheme:dark]">
+                                    </div>
+                                </div>
+                                <div class="mt-6">
+                                    <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 px-4 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                        Save Task
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </template>
         </div>
         
         <!-- Events -->
@@ -299,64 +308,72 @@
                 </div>
                 {% empty %}
                     <div class="text-center py-6">
-                        <p class="text-gray-500 dark:text-gray-400 font-medium">No upcoming events scheduled.</p>
+                        <div class="w-16 h-16 bg-orange-50 dark:bg-orange-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-orange-300 dark:text-orange-500/50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 font-medium mb-4">No upcoming events scheduled.</p>
+                        <button @click="showAddEventModal = true" class="inline-flex items-center px-4 py-2 bg-orange-50 hover:bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:hover:bg-orange-900/50 dark:text-orange-400 font-bold rounded-xl transition-colors">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            Add New Event
+                        </button>
                     </div>
                 {% endfor %}
             </div>
 
             <!-- Add Event Modal -->
-            <div x-show="showAddEventModal" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
-                <div x-show="showAddEventModal" x-transition.opacity class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm" @click="showAddEventModal = false"></div>
-                
-                <div x-show="showAddEventModal" 
-                     x-transition:enter="transition ease-out duration-300 transform"
-                     x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                     x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                     x-transition:leave="transition ease-in duration-200 transform"
-                     x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                     class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md p-6 overflow-hidden text-left">
-                     
-                     <div class="flex justify-between items-center mb-5">
-                         <h3 class="text-xl font-bold text-gray-900 dark:text-white">Add New Event</h3>
-                         <button @click="showAddEventModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
-                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                         </button>
-                     </div>
-                     
-                     <form action="{% url 'care:add_event' animal.id %}" method="post">
-                         {% csrf_token %}
-                         <div class="space-y-4">
-                             <div>
-                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Event Title</label>
-                                 {{ event_form.title }}
-                             </div>
-                             <div>
-                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Event Type</label>
-                                 {{ event_form.event_type }}
-                             </div>
-                             <div>
-                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date & Time</label>
-                                 {{ event_form.date }}
-                             </div>
-                             <div>
-                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes (Optional)</label>
-                                 {{ event_form.notes }}
-                             </div>
-                         </div>
-                         <div class="mt-6">
-                             <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
-                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                 Save Event
-                             </button>
-                         </div>
-                     </form>
+            <template x-teleport="body">
+                <div x-show="showAddEventModal" class="fixed inset-0 z-[100] flex items-center justify-center sm:p-4" x-cloak>
+                    <div x-show="showAddEventModal" x-transition.opacity class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm" @click="showAddEventModal = false"></div>
+                    <div x-show="showAddEventModal"
+                         x-transition:enter="transition ease-out duration-300 transform"
+                         x-transition:enter-start="opacity-0 translate-y-full sm:translate-y-4 sm:scale-95"
+                         x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                         x-transition:leave="transition ease-in duration-200 transform"
+                         x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                         x-transition:leave-end="opacity-0 translate-y-full sm:translate-y-4 sm:scale-95"
+                         class="relative bg-white dark:bg-gray-800 sm:rounded-2xl shadow-2xl w-full h-full sm:h-auto sm:max-h-[90vh] max-w-lg flex flex-col overflow-hidden text-left" @click.stop>
+                        <div class="flex-shrink-0 flex justify-between items-center p-6 border-b border-gray-100 dark:border-gray-700">
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white">Add New Event</h3>
+                            <button @click="showAddEventModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+                        <div class="flex-1 overflow-y-auto p-6 custom-scrollbar">
+                            <form action="{% url 'care:add_event' animal.id %}" method="post">
+                                {% csrf_token %}
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Event Title</label>
+                                        {{ event_form.title }}
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Event Type</label>
+                                        {{ event_form.event_type }}
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date & Time</label>
+                                        {{ event_form.date }}
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes (Optional)</label>
+                                        {{ event_form.notes }}
+                                    </div>
+                                </div>
+                                <div class="mt-6">
+                                    <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        Save Event
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </template>
         </div>
 
         <!-- Call to Action Banner -->
-        <div class="lg:col-span-12 relative overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 rounded-[2rem] p-8 sm:p-10 shadow-xl group flex flex-col sm:flex-row items-center justify-between gap-8 mt-4" style="animation: fadeUp 0.4s ease-out 0.3s backwards;" x-data="{ showAddObservationModal: false }">
+        <div class="lg:col-span-12 relative overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 rounded-[2rem] p-8 sm:p-10 shadow-xl group flex flex-col sm:flex-row items-center justify-between gap-8 mt-4" style="animation: fadeUp 0.4s ease-out 0.3s backwards;" x-data="{ showAddObservationModal: false }" @open-add-observation.window="showAddObservationModal = true">
             <div class="absolute top-0 right-0 w-96 h-96 bg-brand-500 opacity-20 rounded-full blur-3xl -mr-32 -mt-32 transition-transform duration-700 group-hover:scale-125"></div>
             <div class="absolute bottom-0 left-0 w-96 h-96 bg-teal-500 opacity-10 rounded-full blur-3xl -ml-32 -mb-32 transition-transform duration-700 group-hover:scale-125"></div>
             
@@ -372,58 +389,61 @@
             </div>
 
             <!-- Add Observation Modal -->
-            <div x-show="showAddObservationModal" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
+            <div x-show="showAddObservationModal" class="fixed inset-0 z-[100] flex items-center justify-center sm:p-4" x-cloak>
                 <div x-show="showAddObservationModal" x-transition.opacity class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm" @click="showAddObservationModal = false"></div>
                 
                 <div x-show="showAddObservationModal" 
                      x-transition:enter="transition ease-out duration-300 transform"
-                     x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                     x-transition:enter-start="opacity-0 translate-y-full sm:translate-y-4 sm:scale-95"
                      x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
                      x-transition:leave="transition ease-in duration-200 transform"
                      x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                     class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md p-6 overflow-hidden text-left">
+                     x-transition:leave-end="opacity-0 translate-y-full sm:translate-y-4 sm:scale-95"
+                     class="relative bg-white dark:bg-gray-800 sm:rounded-2xl shadow-2xl w-full h-full sm:h-auto sm:max-h-[90vh] max-w-lg flex flex-col overflow-hidden text-left" @click.stop>
                      
-                     <div class="flex justify-between items-center mb-5">
+                     <div class="flex-shrink-0 flex justify-between items-center p-6 border-b border-gray-100 dark:border-gray-700">
                          <h3 class="text-xl font-bold text-gray-900 dark:text-white">Add Observation Log</h3>
                          <button @click="showAddObservationModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
                              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                          </button>
                      </div>
                      
-                     <form action="{% url 'care:add_observation' animal.id %}" method="post">
-                         {% csrf_token %}
-                         <div class="space-y-4">
-                             <div>
-                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Weight (kg)</label>
-                                 {{ observation_form.weight_kg }}
+                     <div class="flex-1 overflow-y-auto p-6 custom-scrollbar">
+                         <form action="{% url 'care:add_observation' animal.id %}" method="post">
+                             {% csrf_token %}
+                             <div class="space-y-4">
+                                 <div>
+                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Weight (kg)</label>
+                                     {{ observation_form.weight_kg }}
+                                 </div>
+                                 <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Activity Level</label>
+                                        {{ observation_form.activity_level }}
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Appetite Level</label>
+                                        {{ observation_form.appetite_level }}
+                                    </div>
+                                 </div>
+                                 <div>
+                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes</label>
+                                     {{ observation_form.notes }}
+                                 </div>
                              </div>
-                             <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Activity Level</label>
-                                    {{ observation_form.activity_level }}
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Appetite Level</label>
-                                    {{ observation_form.appetite_level }}
-                                </div>
+                             <div class="mt-6">
+                                 <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                     Save Observation
+                                 </button>
                              </div>
-                             <div>
-                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes</label>
-                                 {{ observation_form.notes }}
-                             </div>
-                         </div>
-                         <div class="mt-6">
-                             <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
-                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                 Save Observation
-                             </button>
-                         </div>
-                     </form>
+                         </form>
+                     </div>
                 </div>
             </div>
         </div>
     </div>
+
 </div>
 
 {% endblock %}

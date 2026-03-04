@@ -1,0 +1,114 @@
+<form hx-post="{% url 'animals:animal_create' %}"
+      hx-target="#add-animal-form-container"
+      hx-swap="innerHTML"
+      hx-encoding="multipart/form-data"
+      class="space-y-5">
+    {% csrf_token %}
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+            <label for="id_name" class="block text-sm font-semibold text-gray-900 dark:text-gray-200 mb-1.5">Name</label>
+            {{ form.name }}
+            {% if form.name.errors %}
+            <p class="mt-1 text-sm text-red-500">{{ form.name.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label for="id_species" class="block text-sm font-semibold text-gray-900 dark:text-gray-200 mb-1.5">Species</label>
+            <select name="species" id="id_species"
+                class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2.5 focus:ring-brand-500 focus:border-brand-500"
+                hx-get="{% url 'animals:load_breeds' %}"
+                hx-target="#id_breed"
+                hx-trigger="change"
+                hx-swap="innerHTML">
+                <option value="">---------</option>
+                {% for choice in form.species.field.queryset %}
+                <option value="{{ choice.pk }}" {% if form.species.value|stringformat:"s" == choice.pk|stringformat:"s" %}selected{% endif %}>{{ choice }}</option>
+                {% endfor %}
+            </select>
+            {% if form.species.errors %}
+            <p class="mt-1 text-sm text-red-500">{{ form.species.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label for="id_breed" class="block text-sm font-semibold text-gray-900 dark:text-gray-200 mb-1.5">Breed</label>
+            {{ form.breed }}
+            {% if form.breed.errors %}
+            <p class="mt-1 text-sm text-red-500">{{ form.breed.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label for="id_gender" class="block text-sm font-semibold text-gray-900 dark:text-gray-200 mb-1.5">Gender</label>
+            {{ form.gender }}
+            {% if form.gender.errors %}
+            <p class="mt-1 text-sm text-red-500">{{ form.gender.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label for="id_birth_date" class="block text-sm font-semibold text-gray-900 dark:text-gray-200 mb-1.5">Birth Date</label>
+            {{ form.birth_date }}
+            {% if form.birth_date.errors %}
+            <p class="mt-1 text-sm text-red-500">{{ form.birth_date.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label for="id_chip_number" class="block text-sm font-semibold text-gray-900 dark:text-gray-200 mb-1.5">Chip Number</label>
+            {{ form.chip_number }}
+            {% if form.chip_number.errors %}
+            <p class="mt-1 text-sm text-red-500">{{ form.chip_number.errors.0 }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div>
+        <label for="id_health_status" class="block text-sm font-semibold text-gray-900 dark:text-gray-200 mb-1.5">Health Status</label>
+        {{ form.health_status }}
+        {% if form.health_status.errors %}
+        <p class="mt-1 text-sm text-red-500">{{ form.health_status.errors.0 }}</p>
+        {% endif %}
+    </div>
+
+    <div>
+        <label for="id_description" class="block text-sm font-semibold text-gray-900 dark:text-gray-200 mb-1.5">Description</label>
+        {{ form.description }}
+        {% if form.description.errors %}
+        <p class="mt-1 text-sm text-red-500">{{ form.description.errors.0 }}</p>
+        {% endif %}
+    </div>
+
+    <div>
+        <label for="id_photo" class="block text-sm font-semibold text-gray-900 dark:text-gray-200 mb-1.5">Photo</label>
+        <input type="file" name="photo" id="id_photo" accept="image/*"
+            class="w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-700 dark:file:bg-brand-900/30 dark:file:text-brand-300 hover:file:bg-brand-100 dark:hover:file:bg-brand-800/50 transition-colors">
+    </div>
+
+    <div class="flex items-center gap-3">
+        {{ form.is_available_for_adoption }}
+        <label for="id_is_available_for_adoption" class="text-sm font-medium text-gray-700 dark:text-gray-300">Available for adoption</label>
+    </div>
+
+    {% if form.non_field_errors %}
+    <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-3">
+        {% for error in form.non_field_errors %}
+        <p class="text-sm text-red-600 dark:text-red-400">{{ error }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="flex justify-end gap-3 pt-2">
+        <button type="button"
+            @click="showAddAnimalModal = false"
+            class="px-6 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            Cancel
+        </button>
+        <button type="submit"
+            class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold shadow-md hover:shadow-lg transition-all">
+            Add Animal
+        </button>
+    </div>
+</form>

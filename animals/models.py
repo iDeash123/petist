@@ -121,14 +121,37 @@ class AdoptionRequest(models.Model):
 
     def save(self, *args, **kwargs):
         print(f"DEBUG: Saving AdoptionRequest {self.id} for {self.animal.name}. Status: {self.status}")
-        if self.status == "approved":
+        
+        is_new = self.pk is None
+        old_status = None
+        
+        if not is_new:
+            try:
+                old_status = AdoptionRequest.objects.get(pk=self.pk).status
+            except AdoptionRequest.DoesNotExist:
+                pass
+
+        super().save(*args, **kwargs)
+
+        if self.status == "approved" and old_status != "approved":
             print(f"DEBUG: Marking {self.animal.name} as unavailable.")
             self.animal.is_available_for_adoption = False
             self.animal.save()
             self.user.adopted_pets.add(self.animal)
-        
-        
-        super().save(*args, **kwargs)
+        elif self.status in ["pending", "rejected"] and old_status == "approved":
+            print(f"DEBUG: Marking {self.animal.name} as available due to status change.")
+            self.animal.is_available_for_adoption = True
+            self.animal.save()
+            self.user.adopted_pets.remove(self.animal)
+
+    def delete(self, *args, **kwargs):
+        if self.status == "approved":
+            print(f"DEBUG: Marking {self.animal.name} as available due to request deletion.")
+            self.animal.is_available_for_adoption = True
+            self.animal.save()
+            self.user.adopted_pets.remove(self.animal)
+            
+        super().delete(*args, **kwargs)
 
 
 @receiver([post_save, post_delete], sender=Species)

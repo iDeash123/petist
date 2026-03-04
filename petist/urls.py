@@ -19,12 +19,13 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, RedirectView
 import debug_toolbar
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", TemplateView.as_view(template_name="home.html"), name="home"),
+    path("favicon.ico", RedirectView.as_view(url=settings.STATIC_URL + "favicon.png", permanent=True)),
     path("catalog/", include("animals.urls")),
     path("care/", include("care.urls")),
     path("users/", include("users.urls")),

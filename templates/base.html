@@ -7,14 +7,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token }}">
     <title>{% block title %}Petist - Pet Care System{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'favicon.png' %}">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-    <script src="https://unpkg.com/htmx.org@1.9.10/dist/ext/ws.js"></script>
-
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
@@ -45,49 +46,7 @@
     }"
     x-init="$watch('darkMode', val => val ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark'))">
 
-    {% if user.is_authenticated %}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            var socket_url = protocol + '//' + window.location.host + '/ws/adoption-requests/';
-            var socket = new WebSocket(socket_url);
-            
-            socket.onmessage = function(e) {
-                var data = JSON.parse(e.data);
-                if (data.html) {
-                    // Create a temporary div to parse the incoming HTML
-                    var temp = document.createElement('div');
-                    temp.innerHTML = data.html;
-                    
-                    // We can use HTMX's internal method to process OOB swaps from a string.
-                    // This is much safer than manually replacing DOM strings.
-                    htmx.process(temp);
-                    
-                    // But actually, for OOB swaps to work from Javascript, we just let HTMX parse it
-                    // The easiest trick is:
-                    var fakeServerResponse = data.html;
-                    var swapInfo = htmx.ajax('GET', 'javascript:void(0)', {
-                        handler: function(elt, info) {
-                            // HTMX will handle OOB elements automatically if we mock a response!
-                        }
-                    });
-                    
-                    // Actually, there's a simpler way without hacking HTMX:
-                    // Since the items have IDs, we just manually replace them:
-                    var elementsToReplace = temp.querySelectorAll('[id]');
-                    elementsToReplace.forEach(function(newEl) {
-                        var oldEl = document.getElementById(newEl.id);
-                        if (oldEl) {
-                            oldEl.outerHTML = newEl.outerHTML;
-                            // Re-process HTMX on the new element
-                            htmx.process(document.getElementById(newEl.id));
-                        }
-                    });
-                }
-            };
-        });
-    </script>
-    {% endif %}
+
 
     <!-- Navigation -->
     <nav

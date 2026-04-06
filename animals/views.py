@@ -35,7 +35,11 @@ def toggle_favorite(request, slug):
     is_from_my_pets = request.GET.get("from_my_pets") == "1"
 
     new_fav_count = user.favorites.count()
-    oob_count_html = f'<span id="favorites-count" hx-swap-oob="true" class="text-sm text-gray-500">{new_fav_count} animals</span>'
+    oob_count_html = render_to_string(
+        "users/includes/favorites_count_oob.html",
+        {"new_fav_count": new_fav_count},
+        request=request
+    )
 
     extra_oob_html = ""
 
@@ -86,13 +90,21 @@ def toggle_favorite(request, slug):
             animal_card_html = render_to_string(
                 "animals/includes/animal_card_list.html", context, request=request
             )
-            oob_container_html = f'<div id="favorites-container" hx-swap-oob="true"><div class="grid grid-cols-1 md:grid-cols-2 gap-6">{animal_card_html}</div></div>'
+            oob_container_html = render_to_string(
+                "users/includes/favorites_container_oob.html",
+                {"inner_html": animal_card_html, "unwrap": False},
+                request=request
+            )
         else:
             if new_fav_count == 0:
                 empty_state_html = render_to_string(
                     "users/includes/favorites_empty.html", request=request
                 )
-                oob_container_html = f'<div id="favorites-container" hx-swap-oob="true">{empty_state_html}</div>'
+                oob_container_html = render_to_string(
+                    "users/includes/favorites_container_oob.html",
+                    {"inner_html": empty_state_html, "unwrap": True},
+                    request=request
+                )
             else:
                 remaining_favorites = user.favorites.all()
                 context = {
@@ -110,7 +122,11 @@ def toggle_favorite(request, slug):
                 animal_card_html = render_to_string(
                     "animals/includes/animal_card_list.html", context, request=request
                 )
-                oob_container_html = f'<div id="favorites-container" hx-swap-oob="true"><div class="grid grid-cols-1 md:grid-cols-2 gap-6">{animal_card_html}</div></div>'
+                oob_container_html = render_to_string(
+                    "users/includes/favorites_container_oob.html",
+                    {"inner_html": animal_card_html, "unwrap": False},
+                    request=request
+                )
 
         button_context = {
             "animal": animal,
@@ -163,7 +179,11 @@ def toggle_adoption(request, slug):
 
     new_request_count = AdoptionRequest.objects.filter(user=user).count()
 
-    oob_sidebar_count_html = f'<span id="sidebar-pets-count" hx-swap-oob="true" class="block text-xl font-bold text-gray-900 dark:text-white">{new_request_count}</span>'
+    oob_sidebar_count_html = render_to_string(
+        "users/includes/sidebar_pets_count_oob.html",
+        {"new_request_count": new_request_count},
+        request=request
+    )
 
     extra_oob_html = ""
 
@@ -173,7 +193,11 @@ def toggle_adoption(request, slug):
             empty_html = render_to_string(
                 "users/includes/my_pets_empty.html", request=request
             )
-            oob_mypets_list = f'<div id="adopted-pets-container" hx-swap-oob="true">{empty_html}</div>'
+            oob_mypets_list = render_to_string(
+                "users/includes/adopted_pets_container_oob.html",
+                {"inner_html": empty_html, "unwrap": True},
+                request=request
+            )
         else:
             context = {
                 "animals": [req.animal for req in requests],
@@ -190,7 +214,11 @@ def toggle_adoption(request, slug):
             list_html = render_to_string(
                 "animals/includes/animal_card_list.html", context, request=request
             )
-            oob_mypets_list = f'<div id="adopted-pets-container" hx-swap-oob="true"><div class="grid grid-cols-1 md:grid-cols-2 gap-6">{list_html}</div></div>'
+            oob_mypets_list = render_to_string(
+                "users/includes/adopted_pets_container_oob.html",
+                {"inner_html": list_html, "unwrap": False},
+                request=request
+            )
 
         extra_oob_html += oob_mypets_list
 
@@ -387,8 +415,14 @@ def animal_create(request):
             card_html = render_to_string(
                 "animals/includes/animal_card_list.html", context, request=request
             )
-            oob_html = f'<div id="animal-grid" hx-swap-oob="afterbegin">{card_html}</div>'
-            success_html = '<div class="text-center py-4"><p class="text-green-600 dark:text-green-400 font-semibold text-lg">Animal added successfully!</p></div>'
+            oob_html = render_to_string(
+                "animals/includes/animal_grid_oob.html",
+                {"card_html": card_html},
+                request=request
+            )
+            success_html = render_to_string(
+                "animals/includes/animal_create_success.html", request=request
+            )
             response = HttpResponse(success_html + oob_html)
             response["HX-Trigger"] = "animalCreated"
             return response

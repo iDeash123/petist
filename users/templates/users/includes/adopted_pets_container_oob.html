@@ -1,0 +1,9 @@
+<div id="adopted-pets-container" hx-swap-oob="true">
+    {% if unwrap %}
+        {{ inner_html|safe }}
+    {% else %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {{ inner_html|safe }}
+        </div>
+    {% endif %}
+</div>

@@ -24,6 +24,7 @@ dependencies = [
     "django-htmx==1.27.0",
     "django-qr-code==4.2.0",
     "django-redis==6.0.0",
+    "gunicorn>=25.3.0",
     "hyperlink==21.0.0",
     "idna==3.11",
     "incremental==24.11.0",

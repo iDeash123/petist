@@ -6,11 +6,6 @@
 <div class="relative bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 transition-colors duration-300 overflow-hidden"
     x-data="{ showAddAnimalModal: false }"
     @animal-created.window="showAddAnimalModal = false">
-    <div class="absolute inset-0 z-0 opacity-40 dark:opacity-20">
-        <div class="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-brand-50 dark:bg-brand-900/20 blur-3xl"></div>
-        <div class="absolute top-1/2 -left-24 w-64 h-64 rounded-full bg-blue-50 dark:bg-blue-900/10 blur-3xl"></div>
-    </div>
-
     <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div class="max-w-2xl">
@@ -181,3 +176,4 @@
     </div>
 </div>
 {% endblock %}
+

@@ -110,3 +110,38 @@
     </div>
 </div>
 {% endblock %}
+
+{% block extra_js %}
+<script>
+    (function initHomeAnimations() {
+        gsap.registerPlugin(ScrollTrigger);
+        
+        gsap.from("nav", {
+            y: -100,
+            opacity: 0,
+            duration: 1,
+            ease: "power3.out",
+            clearProps: "transform"
+        });
+
+        const tl = gsap.timeline();
+        
+        tl.from("main h1, main p, main .mt-5", {
+            y: 50,
+            opacity: 0,
+            duration: 1,
+            stagger: 0.15,
+            ease: "power3.out",
+            clearProps: "transform"
+        })
+        .from(".lg\\:absolute svg", {
+            x: 50,
+            opacity: 0,
+            duration: 1.2,
+            ease: "power3.out",
+            clearProps: "transform"
+        }, "-=0.8");
+
+    })();
+</script>
+{% endblock %}
